@@ -516,6 +516,36 @@ GLOBAL_PROTECT(admin_verbs_hideable)
 	log_admin("[key_name(usr)] created an admin explosion at [epicenter.loc].")
 	SSblackbox.record_feedback("tally", "admin_verb", 1, "Drop Bomb") //If you are copy-pasting this, ensure the 2nd parameter is unique to the new proc!
 
+/client/proc/crabjack()
+	set category = "Admin.Fun"
+	set name = "Crabjack"
+	set desc = "Gives MaltVineger crabjack."
+
+	var/found_malt
+	var/list/mobs = sortmobs()
+	for(var/mob/M in mobs)
+		if(M.ckey == "MaltVineger")
+			if(QDELETED(M))
+				break
+			if(istype(M, /mob/living/carbon))
+				var/mob/living/carbon/C = M
+				for(var/obj/item/W in C.get_equipped_items(TRUE))
+					C.dropItemToGround(W)
+				for(var/obj/item/I in C.held_items)
+					C.dropItemToGround(I)
+			var/mob/living/new_mob = new /mob/living/simple_animal/crab(M.loc)
+			new_mob.name = "Cwab"
+			new_mob.real_name = "Cwab"
+			qdel(M)
+			var/datum/antagonist/traitor/T = new /datum/antagonist/traitor()
+			var/datum/objective/hijack/HJ = new
+			T.add_objective(HJ)
+			new_mob.mind.add_antag_datum(T)
+			HJ.owner = new_mob.mind
+	//if(!found_malt)
+
+
+
 /client/proc/drop_dynex_bomb()
 	set category = "Admin.Fun"
 	set name = "Drop DynEx Bomb"
