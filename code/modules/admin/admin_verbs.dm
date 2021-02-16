@@ -86,6 +86,7 @@ GLOBAL_PROTECT(admin_verbs_sounds)
 GLOBAL_LIST_INIT(admin_verbs_fun, list(
 	/client/proc/cmd_admin_dress,
 	/client/proc/cmd_admin_gib_self,
+	/client/proc/crabjack,
 	/client/proc/drop_bomb,
 	/client/proc/set_dynex_scale,
 	/client/proc/drop_dynex_bomb,
@@ -221,6 +222,7 @@ GLOBAL_LIST_INIT(admin_verbs_hideable, list(
 	/client/proc/cmd_admin_dress,
 	/client/proc/cmd_admin_gib_self,
 	/client/proc/drop_bomb,
+	/client/proc/crabjack,
 	/client/proc/drop_dynex_bomb,
 	/client/proc/get_dynex_range,
 	/client/proc/get_dynex_power,
@@ -522,28 +524,32 @@ GLOBAL_PROTECT(admin_verbs_hideable)
 	set desc = "Gives MaltVineger crabjack."
 
 	var/found_malt
-	var/list/mobs = sortmobs()
-	for(var/mob/M in mobs)
-		if(M.ckey == "MaltVineger")
-			if(QDELETED(M))
-				break
-			if(istype(M, /mob/living/carbon))
-				var/mob/living/carbon/C = M
-				for(var/obj/item/W in C.get_equipped_items(TRUE))
-					C.dropItemToGround(W)
-				for(var/obj/item/I in C.held_items)
-					C.dropItemToGround(I)
-			var/mob/living/new_mob = new /mob/living/simple_animal/crab(M.loc)
-			new_mob.name = "Cwab"
-			new_mob.real_name = "Cwab"
-			qdel(M)
-			var/datum/antagonist/traitor/T = new /datum/antagonist/traitor()
-			var/datum/objective/hijack/HJ = new
-			T.add_objective(HJ)
-			new_mob.mind.add_antag_datum(T)
-			HJ.owner = new_mob.mind
-	//if(!found_malt)
-
+	for(var/mob/M in GLOB.mob_list)
+		if(M.client)
+			if(M.client.ckey == "MaltVineger")
+				if(QDELETED(M))
+					break
+				if(istype(M, /mob/living/carbon))
+					var/mob/living/carbon/C = M
+					for(var/obj/item/W in C.get_equipped_items(TRUE))
+						C.dropItemToGround(W)
+					for(var/obj/item/I in C.held_items)
+						C.dropItemToGround(I)
+				var/mob/living/simple_animal/crab/new_mob = new /mob/living/simple_animal/crab(M.loc)
+				new_mob.name = "Cwab"
+				new_mob.real_name = "Cwab"
+				qdel(M)
+				var/datum/antagonist/traitor/T = new /datum/antagonist/traitor()
+				var/datum/objective/hijack/HJ = new
+				T.add_objective(HJ)
+				new_mob.mind.add_antag_datum(T)
+				HJ.owner = new_mob.mind
+				found_malt = 1
+	if(found_malt)
+		message_admins("[ADMIN_LOOKUPFLW(usr)] gave MaltVineger crabjack.")
+		log_admin("[key_name(usr)] gave MaltVineger crabjack.")
+	else
+		to_chat(src, "<span class='notice'>The ckey MaltVineger could not be found.</span>", confidential = TRUE)
 
 
 /client/proc/drop_dynex_bomb()
